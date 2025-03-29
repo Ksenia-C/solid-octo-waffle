@@ -1,0 +1,5 @@
+FROM spark_simple/base:1.0
+
+COPY . /spark/
+
+ENTRYPOINT [ "dockers/master_run.sh" ]

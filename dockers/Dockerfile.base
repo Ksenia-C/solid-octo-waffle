@@ -1,0 +1,34 @@
+# sudo docker build .. --tag spark_simple/base:1.0 -f Dockerfile.base
+FROM archlinux:base
+
+RUN pacman -Syyu --noconfirm
+RUN pacman-db-upgrade
+RUN pacman -Suy --noconfirm jdk17-openjdk wget python3 python-pip \
+git  gcc libjxl libavif aom dav1d libheif base-devel \
+fakeroot \
+pkgconf \
+sudo libwebp
+
+ENV HADOOP_HOME=/opt/hadoop
+ENV PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+ARG HADOOP_VERSION=3.3.6
+RUN wget -q -O hadoop.tar.gz https://archive.apache.org/dist/hadoop/core/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz \
+    && mkdir -p /opt \
+    && tar -xzf hadoop.tar.gz -C /opt \
+    && mv /opt/hadoop-${HADOOP_VERSION} $HADOOP_HOME \
+    && rm hadoop.tar.gz
+COPY config/* $HADOOP_HOME/etc/hadoop/
+RUN pip3 install pillow --break-system-packages
+
+
+ENV SPARK_VERSION=3.5.0
+ENV SPARK_HOME=/opt/spark
+ENV PATH=$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin
+RUN curl -L https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz | tar -xz -C /opt \
+&& mv /opt/spark-${SPARK_VERSION}-bin-hadoop3 $SPARK_HOME
+
+WORKDIR /spark
+
+RUN export SPARK_HOME=/spark
+RUN export PATH=$PATH:$SPARK_HOME/bin
+RUN export PYSPARK_PYTHON=python3

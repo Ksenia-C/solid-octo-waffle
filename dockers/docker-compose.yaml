@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  master:
+    container_name: spark-master
+    build:
+      context: ..
+      dockerfile: dockers/Dockerfile.master
+    hostname: spark-master
+    ports:
+      - "8080:8080"
+      # - "7077:7077"
+      - "4040:4040"
+      - "9870:9870"
+      # - "9000:9000"
+    environment:
+      - SPARK_LOCAL_IP=spark-master
+      - CLUSTER_NAME=hadoop-cluster
+
+  worker1:
+    container_name: workers_container-1
+    build:
+      context: ..
+      dockerfile: dockers/Dockerfile.worker
+    ports:
+      - "8081:8081"
+      - "7000:7000"
+    hostname: spark-worker
+    depends_on:
+      - master
+    environment:
+      - SPARK_LOCAL_IP=spark-worker
+      - CLUSTER_NAME=hadoop-cluster
+  worker2:
+    container_name: workers_container-2
+    build:
+      context: ..
+      dockerfile: dockers/Dockerfile.worker
+    ports:
+      - "8082:8081"
+      - "7001:7000"
+    hostname: spark-worker-2
+    depends_on:
+      - master
+    environment:
+      - SPARK_LOCAL_IP=spark-worker-2
+      - CLUSTER_NAME=hadoop-cluster
+  worker3:
+    container_name: workers_container-3
+    build:
+      context: ..
+      dockerfile: dockers/Dockerfile.worker
+    ports:
+      - "8083:8081"
+      - "7002:7000"
+    hostname: spark-worker-3
+    depends_on:
+      - master
+    environment:
+      - SPARK_LOCAL_IP=spark-worker-3
+      - CLUSTER_NAME=hadoop-cluster
